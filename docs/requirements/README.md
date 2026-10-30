@@ -31,7 +31,7 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 
 | ID | Title | Status |
 |------|-------------------------------------------|---------------|
-| R-001 | Curriculum data model | 🔨 building |
+| R-001 | Curriculum data model | ✅ done |
 | R-002 | Review player + pluggable scheduler | 💤 deferred |
 | R-003 | YAML seed import script | 💤 deferred |
 | R-004 | FSRS scheduler implementation | 💤 deferred |

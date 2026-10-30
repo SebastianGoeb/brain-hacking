@@ -21,9 +21,14 @@ Rust/WASM is a future option for scheduler perf, not a current dependency.
 ## Run it
 
 1. Create a Supabase project. In the SQL editor, run `supabase/schema.sql`.
-2. `cp .env.example .env.local` and fill in URL + anon key (Settings → API).
-3. `npm install`
-4. `npm run dev`
+2. Settings → API → Data API: expose the `public` schema **and** each table
+   (`curricula`, `items`, `reviews`). Schema exposure alone is not enough — an
+   unexposed table returns a misleading `Invalid API key`. RLS still gatekeeps.
+3. `cp .env.example .env.local` and fill in URL + publishable key
+   (Settings → API Keys). URL is the bare origin (`https://<ref>.supabase.co`,
+   no `/rest/v1`). Use the `sb_publishable_...` key.
+4. `npm install`
+5. `npm run dev`
 
 `npm run build` type-checks and outputs static files to `dist/` — deploy that
 folder to any free static host (Vercel, Netlify, Cloudflare Pages).
