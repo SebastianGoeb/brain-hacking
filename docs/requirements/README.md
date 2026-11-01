@@ -32,9 +32,12 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | ID | Title | Status |
 |------|-------------------------------------------|---------------|
 | R-001 | Curriculum data model | ✅ done |
-| R-002 | Review player + pluggable scheduler | 💤 deferred |
+| R-002 | Review player + pluggable scheduler | ✅ done |
 | R-003 | YAML seed import script | 💤 deferred |
 | R-004 | FSRS scheduler implementation | 💤 deferred |
 | R-005 | Strategy A/B partitioning + comparison | 💤 deferred |
 | R-006 | Motivation strategies (dashboard/levels) | 💤 deferred |
 | R-007 | Intentional curriculum ordering design | 💤 deferred |
+| R-008 | OAuth federation + link anon identity | 💤 deferred |
+| R-009 | Automated e2e verification (local Supabase) | ✅ done |
+| R-010 | Principles auto-load + shared home | 🔨 partial |

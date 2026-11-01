@@ -4,17 +4,41 @@ inclusion: always
 
 # Brain Hacking — read before working
 
-This project has a constitution at `docs/principles.md` and per-requirement
-files in `docs/requirements/`. Before building anything:
+The full governance is inlined below (not just linked), so it is in context
+automatically every session. Two layers: a portable team charter and this
+project's constitution. They are authoritative — if a request conflicts, say
+so and change the principle in a commit, or decline the drift.
 
-1. Read `docs/principles.md`. It is authoritative. If a request conflicts with
-   it, say so — change the principle explicitly or decline the drift.
-2. Every unit of work maps to an `R-NNN` file. No feature without one. Update
-   the requirement's status and the index in `docs/requirements/README.md`.
-3. Never regress the two spine invariants: strategies stay pluggable behind an
+## Propagate to subagents
+
+Subagents do NOT inherit this steering. When dispatching ANY subagent, copy the
+two principle sets below (or the relevant rules) into its prompt, and tell it
+the flow is requirement → test → app. Never let a subagent work without them.
+
+## Working rules (quick reference)
+
+1. Flow is requirement → test → app. Every unit of work maps to an `R-NNN` file
+   in `docs/requirements/`; write/extend the e2e test before the app code. If a
+   test and a requirement disagree, the requirement wins — edit the `R-NNN` file
+   in the same change. Keep `docs/requirements/README.md` current.
+2. Never regress the two spine invariants: strategies stay pluggable behind an
    interface, and every review writes a full observation row.
-4. This is an experimentation platform, not just a flashcard app — the user is
-   the test subject. Keep anything we might compare swappable, not hardcoded.
-5. Static SPA, no SSR, Supabase free tier, platform over dependencies.
+3. Verify user-facing changes with `npm run test:e2e` (R-009) against a
+   disposable local DB — don't hand-check a live database. Needs Docker +
+   `supabase start`.
+4. Experimentation platform, not just a flashcard app — the user is the test
+   subject. Keep anything we might compare swappable, not hardcoded.
+5. Static SPA, no SSR, Supabase free tier, publishable key + RLS, platform over
+   dependencies.
 
-Build the spine; defer the rest into requirement files so intent isn't lost.
+---
+
+# Meta-principles (portable team charter)
+
+#[[file:docs/meta-principles.md]]
+
+---
+
+# Project principles (Brain Hacking)
+
+#[[file:docs/principles.md]]

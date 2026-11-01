@@ -1,9 +1,7 @@
-# Principles — the constitution
+# Project principles — Brain Hacking
 
-These are the meta-requirements: the rules that outlive any single feature.
-Read this file first, every session. When a decision conflicts with a feature
-request, the principle wins or the principle changes — explicitly, in a commit —
-never silently.
+Project-specific. Builds on `docs/meta-principles.md` (the portable team
+charter) and never contradicts it. Read both, every session; meta first.
 
 ## What this project is
 
@@ -29,12 +27,12 @@ observation, never hardcode the thing we want to compare.
    custom, fixed-order) sits behind one interface: `(item, history) -> next_due`.
    Same for motivation (dashboards, gamification, levels) and item ordering.
    Anything we might want to A/B is an implementation behind an interface, not a
-   branch in the core.
+   branch in the core. *(Spine invariant — never regress.)*
 
 4. **Every review is a logged observation.** A review records which item, which
    strategy produced it, predicted recall vs. actual, latency, and timestamp —
    not just "next due." The log is the experiment's raw data. Get it right once;
-   analysis is just queries later.
+   analysis is just queries later. *(Spine invariant — never regress.)*
 
 5. **Intentional curriculum structure.** Curricula express designed sequence,
    prerequisites, and deliberate spacing/interleaving to exploit repetition
@@ -42,24 +40,19 @@ observation, never hardcode the thing we want to compare.
    optional mode, never the default and never the only one.
 
 6. **No SSR, no paid infra.** Static SPA, free hosting, Supabase free tier.
-   Browser talks to the DB directly; Row-Level Security is the gatekeeper. If a
-   feature seems to need a server, find the no-server version first.
+   Browser talks to the DB directly with the publishable key; Row-Level Security
+   is the gatekeeper. If a feature seems to need a server, find the no-server
+   version first.
 
-7. **Platform over dependency.** Reach for the standard library and native
-   platform features before adding a package. New dependency needs a reason a
-   few lines of code can't cover.
+## How the team flow binds to this stack
 
-8. **No feature without an R-id.** Every unit of work maps to a requirement file
-   in `docs/requirements/`. No orphan features; no requirement without a reason
-   ("Why") and a testable "Done when."
+Meta-principle 2 (requirement → test → app) is realized here with **Playwright
+e2e against a disposable local Supabase** (R-009):
 
-9. **Build the spine, defer the rest.** Record ambition in requirement files
-   (even deferred ones) so intent isn't lost — but build the minimum that keeps
-   every deferred requirement *reachable without a rewrite*. The two spine
-   invariants that must never regress: strategies are pluggable (rule 3) and
-   every review is logged as an observation (rule 4).
-
-## Changing these rules
-
-Principles change by editing this file in a commit that says why. That's the
-whole process. The friction is deliberate: it's what stops context-rot.
+- Every unit of work is an `R-NNN` file in `docs/requirements/` with a reason
+  and a testable "Done when"; the index in that folder's README stays current.
+- A behavioral change is encoded as an e2e test *before* the app code, and is
+  unfinished until `npm run test:e2e` passes. No hand-checking a live DB.
+- If a test and its requirement disagree, the requirement wins; changing a
+  test's expected behavior means editing its `R-NNN` file in the same change.
+- The two spine invariants above (rules 3 and 4) must survive every change.

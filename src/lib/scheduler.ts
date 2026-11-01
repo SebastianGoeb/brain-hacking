@@ -24,3 +24,10 @@ export const stubScheduler: Scheduler = {
     return { nextDue, predictedRecall: grade === 0 ? 0.3 : 0.9 };
   },
 };
+
+// Registry: the player picks a strategy by name and records that name on every
+// review (principle 4). Adding FSRS/SM-2 later = one entry here, no player change.
+export const schedulers: Record<string, Scheduler> = {
+  [stubScheduler.name]: stubScheduler,
+};
+
