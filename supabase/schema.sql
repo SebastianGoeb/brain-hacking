@@ -30,6 +30,7 @@ create table if not exists reviews (
   item_id          uuid not null references items (id) on delete cascade,
   reviewer         uuid not null references auth.users (id) default auth.uid(),
   strategy         text not null,                 -- which scheduler produced this (R-002/R-004/R-005)
+  grade            smallint,                       -- raw grade 0..3; schedulers replay this (SM-2/FSRS)
   predicted_recall real,                          -- what the strategy expected
   actual_recall    real,                          -- what actually happened (grade)
   latency_ms       int,

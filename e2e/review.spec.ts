@@ -1,32 +1,40 @@
 import { test, expect } from "@playwright/test";
 import { LOCAL_SUPABASE_URL, LOCAL_SECRET_KEY } from "./env";
 
-// R-002 verified automatically: drive the full grade cycle in the browser, then
-// assert the observation row landed in the DB — the thing we used to hand-check.
-test("grading an item writes a complete reviews observation row", async ({ page }) => {
-  await page.goto("/");
+const db = (path: string) =>
+  fetch(`${LOCAL_SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { apikey: LOCAL_SECRET_KEY, Authorization: `Bearer ${LOCAL_SECRET_KEY}` },
+  });
 
-  // Curriculum list -> start review.
+// R-002 + R-004 verified automatically: drive the real grade cycle in the
+// browser, assert the observation rows in Postgres (R-002), and assert the due
+// queue empties as SM-2 pushes next_due into the future (R-004).
+test("review loop writes sm2 observations and due-filters the queue", async ({ page }) => {
+  await page.goto("/");
   await page.getByRole("button", { name: "Demo Deck" }).click();
 
-  // Reveal -> grade.
+  // Two seeded items are due; grade both.
+  await expect(page.getByText("1 / 2")).toBeVisible();
   await page.getByRole("button", { name: "Reveal" }).click();
   await page.getByRole("button", { name: "Good" }).click();
+  await page.getByRole("button", { name: "Reveal" }).click();
+  await page.getByRole("button", { name: "Good" }).click();
+  await expect(page.getByText(/Done — reviewed 2/)).toBeVisible();
 
-  // UI reaches done.
-  await expect(page.getByText(/Done — reviewed/)).toBeVisible();
+  // R-002: complete observation rows, strategy now sm2.
+  const rows = (await (await db(
+    "reviews?select=strategy,predicted_recall,actual_recall,latency_ms,next_due&order=reviewed_at.desc",
+  )).json()) as any[];
+  expect(rows.length).toBe(2);
+  for (const r of rows) {
+    expect(r.strategy).toBe("sm2");
+    expect(r.next_due).not.toBeNull();
+    expect(r.latency_ms).toBeGreaterThanOrEqual(0);
+    expect(new Date(r.next_due).getTime()).toBeGreaterThan(Date.now()); // pushed into the future
+  }
 
-  // Direct data assertion via PostgREST with the secret key (bypasses RLS to read
-  // ground truth). Plain fetch — no supabase-js, so no Node WebSocket dependency.
-  const res = await fetch(
-    `${LOCAL_SUPABASE_URL}/rest/v1/reviews?select=strategy,predicted_recall,actual_recall,latency_ms,next_due&order=reviewed_at.desc&limit=1`,
-    { headers: { apikey: LOCAL_SECRET_KEY, Authorization: `Bearer ${LOCAL_SECRET_KEY}` } },
-  );
-  expect(res.ok).toBe(true);
-  const rows = (await res.json()) as any[];
-  expect(rows.length).toBe(1);
-  const row = rows[0];
-  expect(row.strategy).toBe("stub-fixed");
-  expect(row.next_due).not.toBeNull();
-  expect(row.latency_ms).toBeGreaterThanOrEqual(0);
+  // R-004: both items now have future next_due, so the queue is empty on reload.
+  await page.reload();
+  await page.getByRole("button", { name: "Demo Deck" }).click();
+  await expect(page.getByText(/Nothing due right now/)).toBeVisible();
 });

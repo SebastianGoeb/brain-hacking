@@ -34,7 +34,7 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | R-001 | Curriculum data model | ✅ done |
 | R-002 | Review player + pluggable scheduler | ✅ done |
 | R-003 | YAML seed import script | ❌ dropped |
-| R-004 | FSRS scheduler implementation | 💤 deferred |
+| R-004 | Real scheduler (SM-2) + due-queue filtering | ✅ done |
 | R-005 | Strategy A/B partitioning + comparison | 💤 deferred |
 | R-006 | Motivation strategies (dashboard/levels) | 💤 deferred |
 | R-007 | Intentional curriculum ordering design | 💤 deferred |
@@ -44,3 +44,4 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | R-011 | Deploy schema/migrations to hosted DB | 💤 deferred |
 | R-012 | Frontend CD on Vercel | ✅ done |
 | R-013 | In-app curriculum editor | 💤 deferred |
+| R-014 | FSRS scheduler + compare against baselines | 💤 deferred |

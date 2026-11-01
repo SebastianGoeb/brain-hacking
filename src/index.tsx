@@ -2,10 +2,10 @@
 import { render } from "solid-js/web";
 import { createResource, createSignal, For, Show } from "solid-js";
 import { supabase, ensureUser } from "./lib/supabase";
-import { stubScheduler, type Grade } from "./lib/scheduler";
+import { sm2Scheduler, type Grade, type Review } from "./lib/scheduler";
 
 type Curriculum = { id: string; title: string; subject: string; description: string | null };
-type Item = { id: string; prompt: string; answer: string };
+type Item = { id: string; prompt: string; answer: string; history: Review[] };
 
 const GRADES: { g: Grade; label: string }[] = [
   { g: 0, label: "Again" },
@@ -23,25 +23,45 @@ async function fetchCurricula(): Promise<Curriculum[]> {
   return data ?? [];
 }
 
-async function fetchItems(curriculumId: string): Promise<Item[]> {
+// Fetch items with their review history (RLS scopes reviews to this user), keep
+// only those due now (never reviewed, or latest next_due <= now), in position
+// order. The grade history feeds SM-2 so intervals grow across sessions.
+async function fetchDueItems(curriculumId: string): Promise<Item[]> {
   const { data, error } = await supabase
     .from("items")
-    .select("id, prompt, answer")
+    .select("id, prompt, answer, position, reviews(grade, reviewed_at, next_due)")
     .eq("curriculum_id", curriculumId)
     .order("position");
   if (error) throw error;
-  return data ?? [];
+  const now = Date.now();
+  return (data ?? [])
+    .map((it: any) => {
+      const revs = (it.reviews ?? [])
+        .slice()
+        .sort((a: any, b: any) => +new Date(a.reviewed_at) - +new Date(b.reviewed_at));
+      const latest = revs[revs.length - 1];
+      return {
+        id: it.id,
+        prompt: it.prompt,
+        answer: it.answer,
+        history: revs.map((r: any) => ({ reviewedAt: new Date(r.reviewed_at), grade: r.grade as Grade })),
+        due: !latest || !latest.next_due || +new Date(latest.next_due) <= now,
+      };
+    })
+    .filter((it: any) => it.due)
+    .map(({ due, ...it }: any) => it as Item);
 }
 
-// R-002 spine invariant: next-due comes from the Scheduler interface, and every
-// review writes a *complete* observation row (strategy, predicted/actual, latency).
+// Spine invariant: next-due comes from the Scheduler interface, every review
+// writes a *complete* observation row (strategy, predicted/actual, latency).
 async function recordReview(item: Item, grade: Grade, latencyMs: number) {
-  const { nextDue, predictedRecall } = stubScheduler.next([], grade);
+  const { nextDue, predictedRecall } = sm2Scheduler.next(item.history, grade);
   const { error } = await supabase.from("reviews").insert({
     item_id: item.id,
-    strategy: stubScheduler.name,
+    strategy: sm2Scheduler.name,
+    grade,
     predicted_recall: predictedRecall,
-    actual_recall: grade === 0 ? 0 : 1, // ponytail: binary recall; refine with grade when a strategy needs it
+    actual_recall: grade === 0 ? 0 : 1, // ponytail: binary recall; refine when a strategy needs the graded signal
     latency_ms: latencyMs,
     next_due: nextDue.toISOString(),
   });
@@ -49,7 +69,7 @@ async function recordReview(item: Item, grade: Grade, latencyMs: number) {
 }
 
 function Player(props: { curriculum: Curriculum; onExit: () => void }) {
-  const [items] = createResource(() => props.curriculum.id, fetchItems);
+  const [items] = createResource(() => props.curriculum.id, fetchDueItems);
   const [idx, setIdx] = createSignal(0);
   const [revealed, setRevealed] = createSignal(false);
   const [shownAt, setShownAt] = createSignal(Date.now());
@@ -75,11 +95,11 @@ function Player(props: { curriculum: Curriculum; onExit: () => void }) {
     <section>
       <button onClick={props.onExit}>← back</button>
       <h2>{props.curriculum.title}</h2>
-      <Show when={error()}>
-        <p style={{ color: "crimson" }}>Error: {error()}</p>
+      <Show when={error() || items.error}>
+        <p style={{ color: "crimson" }}>Error: {error() ?? String((items.error as any)?.message ?? items.error)}</p>
       </Show>
       <Show when={done()}>
-        <p>Done — reviewed {items()?.length ?? 0} item(s).</p>
+        <p>{(items()?.length ?? 0) === 0 ? "Nothing due right now — come back later." : `Done — reviewed ${items()?.length} item(s).`}</p>
       </Show>
       <Show when={current()} keyed>
         {(item) => (
