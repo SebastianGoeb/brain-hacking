@@ -1,10 +1,14 @@
-# R-003 YAML seed import script — 💤 deferred
+# R-003 YAML seed import script — ❌ dropped
 
-Why: hand-authoring curricula as DB rows gets tedious. A YAML file + seed script
-is a nicer authoring surface — but it stays a build-time convenience, never a
-runtime feature (principle 2).
+Why dropped: the real authoring story is an in-app editor (R-013), which
+supersedes a YAML pipeline. Building a YAML→DB script now would be speculative
+infrastructure for a need the editor replaces (meta-principle 4 / YAGNI).
 
-Done when: `scripts/seed.ts` reads a YAML curriculum and upserts it into the DB.
-The app never reads YAML; it only ever reads the DB.
+What we did instead: a richer demo curriculum as plain SQL
+(`supabase/demo-curriculum.sql`) applied to the hosted DB by hand — enough
+content to exercise the review loop on the live site, no new machinery. Made
+item seeds idempotent via a `(curriculum_id, position)` unique constraint
+(migration 0002).
 
-Add when: authoring directly in the DB actually annoys. Not before.
+Revisit only if version-controlled, file-authored curricula become a real need
+*separate from* the editor.

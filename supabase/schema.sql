@@ -20,7 +20,8 @@ create table if not exists items (
   prompt        text not null,
   answer        text not null,
   media_url     text,                             -- -> Supabase Storage
-  meta          jsonb not null default '{}'       -- subject escape hatch (FEN, pinyin, ...)
+  meta          jsonb not null default '{}',      -- subject escape hatch (FEN, pinyin, ...)
+  unique (curriculum_id, position)                 -- one item per position; makes seeds idempotent
 );
 
 -- The observation log (principle 4). Every review is an experiment data point.
