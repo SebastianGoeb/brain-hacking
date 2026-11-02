@@ -45,3 +45,4 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | R-012 | Frontend CD on Vercel | ✅ done |
 | R-013 | In-app curriculum editor | 💤 deferred |
 | R-014 | FSRS scheduler + compare against baselines | 💤 deferred |
+| R-015 | CI: gate PRs on build + unit + e2e | ✅ done |
