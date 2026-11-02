@@ -44,6 +44,16 @@ observation, never hardcode the thing we want to compare.
    is the gatekeeper. If a feature seems to need a server, find the no-server
    version first.
 
+7. **Schema and code deploy independently — migrations stay backward/forward
+   compatible.** Supabase (DB) and Vercel (frontend) ship on separate pipelines
+   with no ordering guarantee, and there is no staging env (cost). So the
+   migration's *shape* is the only safeguard: all four combinations of old/new
+   code × old/new schema must work, because either pipeline can land first or
+   fail. Never put a breaking change in one step — expand/contract: add the new
+   shape (nullable/defaulted) and deploy code that writes it; backfill; migrate
+   reads; then, in a *separate later merge*, remove the old shape. Never drop or
+   tighten a column a currently-deployed version still relies on.
+
 ## How the team flow binds to this stack
 
 Meta-principle 2 (requirement → test → app) is realized here with **Playwright
