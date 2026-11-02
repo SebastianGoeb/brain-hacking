@@ -1,0 +1,36 @@
+name: CI
+
+# main is protected — this gates PRs into it. Both jobs must pass to merge.
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:unit
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Supabase CLI owns the Docker containers (same as local). ubuntu runners
+      # have Docker; `supabase start` applies migrations + seed.
+      - run: npx supabase start
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: always()
+        run: npx supabase stop

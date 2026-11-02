@@ -34,3 +34,9 @@ Read this first, every session.
 6. **Change the rules only in a commit that says why.** These principles — and
    every project's — change by editing the file in a commit explaining the
    change, never silently. The friction is deliberate: it's what stops drift.
+
+7. **Open PRs; never merge them.** Work on a branch, open a PR, then babysit
+   it: watch CI and fix failures on the same branch until every check is green.
+   Merging is the human's decision — never merge, never bypass branch
+   protection. The protected branch is the real gate; this rule is the intended
+   workflow so the agent proposes and the human disposes.

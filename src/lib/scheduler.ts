@@ -30,7 +30,8 @@ export const stubScheduler: Scheduler = {
 // Grade maps again=0, hard=1, good=2, easy=3 onto SM-2's 0..5 quality scale.
 const SM2_QUALITY: Record<Grade, number> = { 0: 2, 1: 3, 2: 4, 3: 5 };
 
-function sm2State(grades: Grade[]): { interval: number; ease: number } {
+// Exported for unit tests (replays ease/interval from a grade sequence).
+export function sm2State(grades: Grade[]): { interval: number; ease: number } {
   let ease = 2.5;
   let interval = 0;
   let reps = 0;
@@ -66,20 +67,4 @@ export const schedulers: Record<string, Scheduler> = {
   [stubScheduler.name]: stubScheduler,
   [sm2Scheduler.name]: sm2Scheduler,
 };
-
-// Runnable self-check (meta-principle: non-trivial logic leaves one check).
-// Run with: npx tsx src/lib/scheduler.ts  (guarded so it never runs in the app)
-declare const process: { argv: string[] } | undefined;
-if (typeof process !== "undefined" && import.meta.url === `file://${process.argv[1]}`) {
-  const g = (grades: Grade[]) => sm2State(grades);
-  // All-good: intervals grow 1 -> 6 -> ~15, ease stays >= start.
-  const good = g([2, 2, 2]);
-  console.assert(good.interval > 6, "3x good should exceed 6-day interval");
-  console.assert(good.ease >= 2.5, "good reviews should not drop ease below start");
-  // A lapse resets interval to 1 regardless of prior growth.
-  console.assert(g([2, 2, 2, 0]).interval === 1, "again must reset interval to 1");
-  // Ease floor holds under repeated failures.
-  console.assert(g([0, 0, 0, 0, 0]).ease === 1.3, "ease must floor at 1.3");
-  console.log("sm2 self-check passed");
-}
 
