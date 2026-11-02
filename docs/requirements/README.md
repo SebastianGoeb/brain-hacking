@@ -33,7 +33,7 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 |------|-------------------------------------------|---------------|
 | R-001 | Curriculum data model | ✅ done |
 | R-002 | Review player + pluggable scheduler | ✅ done |
-| R-003 | YAML seed import script | ❌ dropped |
+| R-003 | CSV-authored corpus + import script | 🔨 building |
 | R-004 | Real scheduler (SM-2) + due-queue filtering | ✅ done |
 | R-005 | Strategy A/B partitioning + comparison | 💤 deferred |
 | R-006 | Motivation strategies (dashboard/levels) | 💤 deferred |
@@ -41,8 +41,14 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | R-008 | OAuth federation + link anon identity | 💤 deferred |
 | R-009 | Automated e2e verification (local Supabase) | ✅ done |
 | R-010 | Principles auto-load + shared home | 🔨 partial |
-| R-011 | Deploy schema/migrations to hosted DB | 🔨 building |
+| R-011 | Deploy schema/migrations to hosted DB | ✅ done |
 | R-012 | Frontend CD on Vercel | ✅ done |
-| R-013 | In-app curriculum editor | 💤 deferred |
+| R-013 | In-app curriculum editor | 💤 deferred (demoted; R-003 covers authoring) |
 | R-014 | FSRS scheduler + compare against baselines | 💤 deferred |
 | R-015 | CI: gate PRs on build + unit + e2e | ✅ done |
+| R-016 | Concept-reference seam (sibling project) | 💤 deferred |
+| R-017 | Pluggable card interaction / grader type | 💤 deferred |
+| R-018 | Remote auto-grading (CS50-style) | 💤 deferred / out-of-core |
+| R-019 | Pre-reader / kids curriculum | 💤 deferred |
+| R-020 | Multiple learner profiles | 💤 deferred |
+| R-021 | Media pipeline (bulk upload to Storage) | 💤 deferred |
