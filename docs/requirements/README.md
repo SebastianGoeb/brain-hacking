@@ -41,7 +41,7 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 | R-008 | OAuth federation + link anon identity | 💤 deferred |
 | R-009 | Automated e2e verification (local Supabase) | ✅ done |
 | R-010 | Principles auto-load + shared home | 🔨 partial |
-| R-011 | Deploy schema/migrations to hosted DB | 💤 deferred |
+| R-011 | Deploy schema/migrations to hosted DB | 🔨 building |
 | R-012 | Frontend CD on Vercel | ✅ done |
 | R-013 | In-app curriculum editor | 💤 deferred |
 | R-014 | FSRS scheduler + compare against baselines | 💤 deferred |
