@@ -7,3 +7,6 @@ test-results
 playwright-report
 supabase/.branches
 supabase/.temp
+# Corpus CSVs: DB is the source of truth for now (R-003). Committing these is a
+# one-line change here if content versioning is wanted later.
+content/
