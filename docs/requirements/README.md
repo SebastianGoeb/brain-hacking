@@ -33,7 +33,7 @@ IDs are permanent. Never renumber. Dropped is a status, not a deletion.
 |------|-------------------------------------------|---------------|
 | R-001 | Curriculum data model | ✅ done |
 | R-002 | Review player + pluggable scheduler | ✅ done |
-| R-003 | CSV-authored corpus + import script | 🔨 building |
+| R-003 | CSV corpus round-trip (import + export) | ✅ done |
 | R-004 | Real scheduler (SM-2) + due-queue filtering | ✅ done |
 | R-005 | Strategy A/B partitioning + comparison | 💤 deferred |
 | R-006 | Motivation strategies (dashboard/levels) | 💤 deferred |

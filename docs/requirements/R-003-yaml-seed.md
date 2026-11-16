@@ -1,35 +1,43 @@
-# R-003 CSV-authored corpus + import script — 🔨 building
+# R-003 CSV corpus round-trip (import + export) — ✅ done
 
-(Was "YAML seed", dropped; un-dropped and re-scoped to CSV. The in-app editor
-R-013 is demoted — for a single technical author who also lets an AI edit the
-corpus, file authoring beats a CRUD UI.)
+(Was "YAML seed", dropped; un-dropped, re-scoped to CSV, then to a round-trip.)
 
-Why: content must be authorable without a UI, in-repo (version-controlled), and
-editable by an AI across thousands of entries without getting lost. CSV wins:
-one item = one line, line-local edits, trivial bulk append, loud+local failure
-on a bad row. YAML/MD-per-item lose this at scale (nesting/indent state, or
-8000 files).
+Why: content is authored/edited as CSV (one item = one line, AI-editable at
+scale), but the DB is what the app reads (principle 2). Both directions are
+needed: seed/edit a CSV into the DB (import) and pull the DB back to a CSV for
+editing (export). Upstream (drkameleon HSK) is a one-time *seed*, never a live
+dependency — manual edits must persist, so regeneration from source is out.
 
-Done when: `content/<slug>.csv` (RFC-4180) + a `content/curricula.csv` index
-import into the DB via a script. Strict parse — a malformed/duplicate-position
-row fails loudly with its line number, never silently misaligns. Upsert on
-`curricula.slug` and `(items.curriculum_id, position)` (idempotent; the unique
-key from migration 0002). Text-only for now.
+Done when: ✅
+- `scripts/import.ts`: our CSV → DB. Strict RFC-4180 parse; malformed/duplicate-
+  position/invalid-meta row fails loudly with its line. Idempotent upsert on
+  `(items.curriculum_id, position)`.
+- `scripts/export.ts`: DB → our CSV. Deterministic (sorted by position, stable
+  columns) so DB→CSV→DB is churn-free.
+- Round-trip is identity: records → CSV → records (unit test); and verified
+  end-to-end against a real DB (import → export → byte-identical CSV).
 
 ## Format
 
 - `content/curricula.csv`: `slug,title,subject,description,is_public`
-- `content/<slug>.csv`: `position,prompt,answer` (+ optional `meta_json`
-  column added only when a deck first needs nested data — YAGNI until then).
-- Rich/long content (explainers, task specs) does NOT go in these files — it
-  lives in the sibling concept project, referenced via `meta.concept_ref`
-  (R-016). CSV stays dense flashcard rows.
+- `content/<slug>.csv`: `position,prompt,answer,meta_json` (meta_json a JSON
+  cell; `{}` when unused). Rich/long content stays in the sibling concept
+  project via `meta.concept_ref` (R-016), not in these files.
 
-## Build/verify
+## Canonical source: deferred, zero-cost to flip
 
-- Strict RFC-4180 parse via a real CSV lib (not split(',')) — prompts/answers
-  contain commas, quotes, CJK, snippets. Fail loud on bad rows.
-- Import target local-first (run, verify, then prod) — the script reads keys at
-  runtime (like the e2e harness), never hardcoded.
-- Unit test: malformed row → clear error; valid → correct parsed rows.
+DB-as-truth vs git-CSV-as-truth is NOT decided. Both use the same import+export
+scripts; the only difference is which direction runs more and whether the CSV is
+committed. Start with `content/*.csv` **gitignored** (DB is truth, CSV is a
+scratch/edit surface). Committing it later (for content versioning/review) is a
+one-line `.gitignore` change, no code change.
+
+## Notes
+
+- Strict parse via `csv-parse`/`csv-stringify` (RFC-4180: CJK, commas, quotes,
+  snippets) — not `split(',')`.
+- Scripts read Supabase keys at runtime (like the e2e harness), never hardcoded.
+  Local-first: import to local, verify, then prod.
+- Seeding the first HSK CSV from drkameleon is a one-off `convert-hsk.ts` — glue,
+  not part of this requirement's contract.
 - Media upload is separate — R-021.

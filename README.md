@@ -58,6 +58,19 @@ Note: the deploy build runs `npm run build` only — **not** e2e, which needs
 Docker + local Supabase. e2e stays a local pre-push gate (`npm run test:e2e`).
 Schema changes are NOT auto-deployed to the hosted DB yet — see R-011.
 
+## Authoring content (CSV corpus, R-003)
+
+Curricula live in the DB; CSV is the editing surface. Round-trip scripts (need
+`SUPABASE_URL` + `SUPABASE_SECRET_KEY` in env — `supabase status -o env` for
+local):
+
+- `npm run corpus:export <slug> [path]` — DB → `content/<slug>.csv`
+- edit the CSV (line-local; AI-friendly)
+- `npm run corpus:import <slug> [path]` — CSV → DB (idempotent upsert)
+
+The curriculum row must exist first (`curricula.slug`). `content/` is gitignored
+(DB is source of truth); commit it if you want content versioning later.
+
 ## Status
 
 R-001 (data model), R-002 (review player + pluggable scheduler), and R-009
